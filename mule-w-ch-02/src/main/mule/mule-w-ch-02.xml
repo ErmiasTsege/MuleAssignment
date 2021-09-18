@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:batch="http://www.mulesoft.org/schema/mule/batch" xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="fd95af4b-e6c2-4a91-986b-5d2831ea20e2" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<file:config name="File_Config" doc:name="File Config" doc:id="e868bd3d-af3e-4b06-8cbe-a85374336121" >
+	</file:config>
+	<flow name="mule-w-ch-02Flow" doc:id="12ea6e82-91df-4473-86c6-a3498f17e20c" >
+		<http:listener doc:name="Listener" doc:id="a5de060c-aef1-4de2-9a41-e7e30b2be9ec" config-ref="HTTP_Listener_config" path="/wch02"/>
+		<ee:transform doc:name="Transform Message" doc:id="3172bc08-55ea-4fb7-90d5-01b1be751ec5" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"FirstName":attributes.queryParams.FirstName,
+	"LastName":attributes.queryParams.LastName
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="abcbcff6-be9d-4581-b6af-a8a8dfb1011c">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+import * from dw::core::Objects
+output application/json
+---
+valueSet(payload) map ((value, index) -> (sizeOf(value)))
+	
+]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="f9d04fc3-0e4b-4f06-ae43-4086b4ed49aa">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output application/csv
+
+---
+{FirstNameLength :payload[0],
+LastNameLength:payload[1]
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+		<file:write doc:name="Write" doc:id="a9aef8c0-04ce-4081-ab5a-25f8154f1f9e" path="D:\04_Training\Mule_Folder\lenght\length.csv" config-ref="File_Config" mode="APPEND" />
+		<ee:transform doc:name="Transform Message" doc:id="66f2ee17-c70d-40e4-8149-7ac94ea81942">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

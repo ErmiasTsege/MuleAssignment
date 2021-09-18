@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="4ba4c434-f374-4ee9-8b40-d080b8945073" >
+		<http:listener-connection host="localhost" port="8083" />
+	</http:listener-config>
+	<flow name="mule-get-post-put-projectFlow" doc:id="b9bb074a-8b20-480f-a822-8b7c447dbadb" >
+		<http:listener doc:name="Listener" doc:id="cc2e8589-6292-4372-adc6-68cff889cd56" config-ref="HTTP_Listener_config" path="/method"/>
+		<choice doc:name="Choice" doc:id="727d5f27-464e-4f45-995b-dbcd2dc1cb6a" >
+			<when expression="#[attributes.method=='GET']">
+				<file:write doc:name="Write" doc:id="b87ce591-3ea5-4211-bc50-dcc6c8f78069" path="D:\04_Training\Mule_Folder\method\get.txt" mode="APPEND">
+					<file:content ><![CDATA[#["you invoked" ++ " " ++ attributes.method++" "++ "method."]]]></file:content>
+				</file:write>
+			</when>
+			<when expression="#[attributes.method=='POST']">
+				<file:write doc:name="Write" doc:id="afd678ac-258f-45eb-bc38-bf78c1989f07" path="D:\04_Training\Mule_Folder\method\post.txt" mode="APPEND">
+					<file:content ><![CDATA[#["you invoked" ++ " " ++ attributes.method++" "++ "method."]]]></file:content>
+				</file:write>
+			</when>
+			<when expression="#[attributes.method=='PUT']">
+				<file:write doc:name="Write" doc:id="aa1a80bc-ff49-456d-96fd-0152c5ed4bcd" path="D:\04_Training\Mule_Folder\method\put.txt" mode="APPEND">
+					<file:content ><![CDATA[#["you invoked" ++ " " ++ attributes.method++" "++ "method."]]]></file:content>
+				</file:write>
+			</when>
+			<otherwise>
+				<ee:transform doc:name="Transform Message" doc:id="df8a2787-f260-4b57-b2a6-4f5ba64ed50a" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+"please, use GET,POST or PUT method."]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</otherwise>
+		</choice>
+		<ee:transform doc:name="Transform Message" doc:id="4bfaae1b-e0da-42a3-8fe1-bd194ec90318" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+attributes.method]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="309dd734-6d20-4331-96a8-94b27d2f690a" >
+				<ee:transform doc:name="Transform Message" doc:id="a7b72f66-e1ec-45ce-8423-4b4ae37c9dfc" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{error:"File insertion failed"}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+</mule>

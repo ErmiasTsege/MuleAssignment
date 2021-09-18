@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="94083211-dd62-4055-9178-00e40833c806" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="mule-removevariablesFlow" doc:id="9b2f0ba2-4693-4f55-8ba1-fe5133c4e7fd" >
+		<http:listener doc:name="Listener" doc:id="e99a5386-a06b-4199-8357-ab71a6c97744" config-ref="HTTP_Listener_config" path="/remove"/>
+		<set-variable value="abebe" doc:name="Set Variable" doc:id="c0a82e17-c55b-4992-a5b6-29f90c2205ef" variableName="v1"/>
+		<set-variable value="Kebede" doc:name="Set Variable" doc:id="7f5d0d02-5a65-4d31-a39f-c573840c65f6" variableName="v2"/>
+		<set-variable value="Gemchu" doc:name="Set Variable" doc:id="a7142d58-8e46-46ec-960c-e4206baa17dd" variableName="v3"/>
+		<ee:transform doc:name="Transform Message" doc:id="7e51e1d1-e5c8-4d3e-8e12-6cf34168cb5f" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+import * from dw::core::Objects
+---
+keySet({
+ v1:"v1",
+ v2:"v2",
+ v3:"v3"
+})]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<foreach doc:name="For Each" doc:id="b4dde1f1-4240-4172-8af8-bef31662ff5e" >
+			<remove-variable doc:name="Remove Variable" doc:id="1f248639-d620-42f8-8d2b-1b0b53623951" variableName="#[payload]"/>
+			<logger level="INFO" doc:name="Logger" doc:id="fbfde9de-a635-4115-8714-04c1e3565cd9" message="#[vars.v2]"/>
+		</foreach>
+		<ee:transform doc:name="Transform Message" doc:id="0b99a5fa-2445-4b69-8f32-993114d2883f">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+ v1:vars.v1,
+ v2:vars.v2,
+ v3:vars.v3
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
