@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="2c243214-94f4-48dd-84b2-bfeda08325c0" >
+		<http:listener-connection host="localhost" port="8081" />
+	</http:listener-config>
+	<flow name="dw-q-19-03-assignmentFlow" doc:id="50ad0aff-c872-44c6-849a-46f2ffdd14d8" >
+		<http:listener doc:name="Listener" doc:id="54dfae79-f27f-4eec-8292-a37df52030ed" config-ref="HTTP_Listener_config" path="dwq"/>
+		<ee:transform doc:name="Transform Message" doc:id="af971857-68d4-403a-b482-b40b1b54e149" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var str1= "Jr.Lee I,Max"
+var str2="Sr.Selam II.Max III,Lee"
+---
+{String1:str1,
+	String2:str2
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="a29ee925-b4cd-477f-b117-e72d63295fef" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+[{FirstName:splitBy(payload.String1," ")[0]replace /(\.|,|Jr.|Sr.|III|II|I)/ with(""),LastName:splitBy(payload.String1," ")[1]replace /(\.|,|Jr.|Sr.|III|II|I)/with("")},
+	{FirstName:splitBy(payload.String2," ")[0]replace /(\.|,|Jr.|Sr.|III|II|I)/ with(""),LastName:splitBy(payload.String2," ")[1]replace /(\.|,|Jr.|Sr.|III|II|I)/ with("")}
+]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
